@@ -1,11 +1,8 @@
-// This import is pulling from node_modules now
 const express = require("express");
 const db = require("./database.js");
 
 const server = express();
 
-// This is installing some middleware to allow Express
-// to parse JSON request bodies. We'll go more into detail about this later.
 server.use(express.json());
 
 server.get("/users", (req, res) => {
@@ -20,11 +17,8 @@ server.get("/users", (req, res) => {
 });
 
 server.get("/users/:id", (req, res) => {
-  // The param variable matches up to the name of our URL param above
   const user = db.getUserById(req.params.id);
 
-  // Since we're now taking in values from the client,
-  // we need to make sure the value is valid before trying to use it
   if (user) {
     res.json(user);
   } else {
@@ -35,8 +29,6 @@ server.get("/users/:id", (req, res) => {
 });
 
 server.post("/users", (req, res) => {
-  // never trust data coming from the client,
-  // always validate it to some degree. make sure it's what you're expecting
   if (!req.body.name) {
     return res.status(400).json({
       errorMessage: "Please provide name and bio for the user.",
@@ -52,12 +44,8 @@ server.post("/users", (req, res) => {
 
 server.put("/users/:id", (req, res) => {
   const user = db.getUserById(req.params.id);
-
-  // can't update a user that doesn't exist, so check first
   if (user) {
     const updatedUser = db.updateUser(user.id, {
-      // we whitelist values here instead of passing req.body directly,
-      // so we know exactly what's allowed to be updated and what's not.
       name: req.body.name || user.name,
     });
 
@@ -74,8 +62,6 @@ server.delete("/users/:id", (req, res) => {
 
   if (user) {
     db.deleteUser(user.id);
-    // 204 is just a successful empty response,
-    // since we don't really have anything to return
     res.status(204).end();
   } else {
     res.status(404).json({
